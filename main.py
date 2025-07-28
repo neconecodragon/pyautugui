@@ -1,9 +1,13 @@
 import subprocess
 import time
-import pyautogui
-import pygetwindow as gw
 import random
 import requests
+import os
+
+# Delay import pyautogui sau khi GUI đã sẵn sàng
+time.sleep(2)
+import pyautogui
+import pygetwindow as gw
 
 KEEP_KEYWORDS = ["watch", "chatgpt", "record"]
 
@@ -16,92 +20,80 @@ response_old = requests.get(old_url)
 response_old.raise_for_status()
 links = response_old.text.strip().splitlines()
 
-# 🎯 Lấy 1 link ngẫu nhiên
+# Chọn 1 link ngẫu nhiên
 url = random.choice(links)
-print(f"🎯 Đã chọn link: {url}")
-print("🚀 Đang mở Chrome...")
+print(f"Da chon link: {url}")
+print("Dang mo Chrome...")
 subprocess.Popen(["start", "chrome", "--new-window", url, "--window-size=1280,720"], shell=True)
 
 # 2. Chờ trình duyệt mở và tab chính load
 time.sleep(6)
 
-# 3. Tìm và click nút Play hoặc click giữa màn hình
+# 3. Click nút Play hoặc giữa màn hình
 for i in range(11):
-    print(f"\n🔁 Lặp lần {i+1}/10")
-    # [1] Click Play hoặc click giữa màn hình
+    print(f"\nLap lan {i+1}/10")
     try:
         location = pyautogui.locateOnScreen("play.png", confidence=0.8)
         if location:
             center = pyautogui.center(location)
             pyautogui.moveTo(center.x, center.y, duration=0.3)
             pyautogui.click()
-            print("✅ Đã click nút Play!")
+            print("Da click nut Play!")
         else:
-            raise Exception("Không tìm thấy ảnh")
+            raise Exception("Khong tim thay anh")
     except Exception as e:
-        print("⚠️ Không tìm thấy play.png, đợi tab mới mở & click giữa màn hình thay thế.")
-
+        print("Khong tim thay play.png, se click giua man hinh.")
 
         screen_width, screen_height = pyautogui.size()
-
-        # 🌀 Tạo vị trí x,y random quanh tâm màn hình (±50px)
         rand_x = screen_width // 2 + random.randint(-50, 50)
         rand_y = screen_height // 2 + random.randint(-50, 50)
 
-        # Di chuyển và click
         pyautogui.moveTo(rand_x, rand_y, duration=random.uniform(0.2, 0.6))
         pyautogui.click()
 
-    # [2] Xử lý tab: đóng tab không cần thiết
+    # Xử lý tab
     tabs = get_chrome_windows()
     for w in tabs:
         title = w.title.lower()
         if any(k in title for k in KEEP_KEYWORDS):
-            print(f"✅ Giữ tab: {w.title}")
+            print(f"Giu tab: {w.title}")
         else:
-            print(f"❌ Đóng tab: {w.title}")
+            print(f"Dong tab: {w.title}")
             w.activate()
             time.sleep(3)
             pyautogui.hotkey('ctrl', 'w')
             time.sleep(0.5)
 
-    time.sleep(3)  # ⏱️ nghỉ giữa mỗi vòng lặp nếu cần
+    time.sleep(3)
 
-print("\n🕹️ Bắt đầu mô phỏng hoạt động người dùng trong 250 giây...")
+print("\nBat dau mo phong nguoi dung trong 250 giay...")
 start_time = time.time()
-duration = 250  # giây
+duration = 250
 
 while time.time() - start_time < duration:
-    # Lấy kích thước màn hình
     screen_width, screen_height = pyautogui.size()
-
-    # Tọa độ ngẫu nhiên trong vùng màn hình
     rand_x = random.randint(100, screen_width - 100)
     rand_y = random.randint(100, screen_height - 100)
 
-    # Di chuyển chuột ngẫu nhiên
     pyautogui.moveTo(rand_x, rand_y, duration=random.uniform(0.2, 0.5))
-
-    # Nghỉ 2–4 giây giữa mỗi lần di chuyển
     time.sleep(random.uniform(2, 4))
 
-print("✅ Hoàn tất mô phỏng chuột. Đang chụp màn hình...")
+print("Da hoan tat mo phong. Dang chup man hinh...")
 
-# 📸 Chụp màn hình
 timestamp = int(time.time())
-import os
 os.makedirs("output", exist_ok=True)
 screenshot_path = f"output/screenshot_{timestamp}.png"
 pyautogui.screenshot(screenshot_path)
-print(f"🖼️ Đã lưu ảnh: {screenshot_path}")
-# ❌ Đóng tất cả tab Chrome còn lại
-print("🧹 Đang đóng các tab Chrome còn lại...")
+print(f"Da luu anh: {screenshot_path}")
+
+# Đóng tất cả tab còn lại
+print("Dang dong tat ca tab Chrome...")
 tabs = get_chrome_windows()
 for w in tabs:
-    print(f"❌ Đóng tab: {w.title}")
+    print(f"Dong tab: {w.title}")
     w.activate()
     time.sleep(0.5)
     pyautogui.hotkey('ctrl', 'w')
     time.sleep(0.5)
 
-print("✅ Hoàn tất tất cả.")
+print("Hoan tat tat ca.")
