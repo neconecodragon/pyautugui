@@ -33,3 +33,7 @@ jobs:
 
       - name: ▶️ Run bot script
         run: python main.py
+      
+      - name: ▶️ Run bot script 2
+        run: python main.py
+
